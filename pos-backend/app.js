@@ -13,13 +13,21 @@ const cookieParser = require('cookie-parser');
 const PORT = process.env.PORT;
 connectDB();
 
+const allowedOrigins = [
+    // 'https://classy-moxie-5c2a08.netlify.app',
+    'http://localhost:5173', // Cho môi trường dev
+    'https://localhost:5173'
+];
+
 // Middleware
 app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
 app.use(cors({
     credentials: true,
     // origin: ['https://localhost:5173']
-    origin: true
+    origin: allowedOrigins,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 
 // Root Endpoint
