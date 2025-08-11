@@ -14,7 +14,7 @@ const PORT = process.env.PORT;
 connectDB();
 
 const allowedOrigins = [
-    'https://subtle-mousse-6f050b.netlify.app/auth',
+    'https://subtle-mousse-6f050b.netlify.app',
     'http://localhost:5173', // Cho môi trường dev
     'https://localhost:5173'
 ];
