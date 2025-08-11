@@ -22,41 +22,58 @@ const allowedOrigins = [
 // Middleware
 app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
+// app.use(cors({
+//     credentials: true,
+//     // origin: ['https://localhost:5173']
+//     // origin: allowedOrigins,
+//     origin: function (origin, callback) {
+//         // Cho phép requests không có origin (như mobile apps hoặc curl requests)
+//         if (!origin) return callback(null, true);
+
+//         // Kiểm tra nếu origin kết thúc bằng domain được phép (cho subdomains)
+//         const isAllowed = allowedOrigins.some(allowed => 
+//             origin === allowed || 
+//             origin.startsWith(allowed.replace('https://', 'http://')) ||
+//             origin.startsWith(allowed.replace('http://', 'https://'))
+//         );
+
+
+//         if (allowedOrigins.indexOf(origin) === -1) {
+//             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+//             return callback(new Error(msg), false);
+//         }
+//         return callback(null, true);
+//     },
+//     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     credentials: true
+// }));
+
 app.use(cors({
-    credentials: true,
-    // origin: ['https://localhost:5173']
-    // origin: allowedOrigins,
     origin: function (origin, callback) {
-        // Cho phép requests không có origin (như mobile apps hoặc curl requests)
-        if (!origin) return callback(null, true);
+        if (!origin) return callback(null, true); // Cho phép request không có origin (Postman, curl)
 
-        // Kiểm tra nếu origin kết thúc bằng domain được phép (cho subdomains)
-        const isAllowed = allowedOrigins.some(allowed => 
-            origin === allowed || 
-            origin.startsWith(allowed.replace('https://', 'http://')) ||
-            origin.startsWith(allowed.replace('http://', 'https://'))
-        );
-
-
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        const isAllowed = allowedOrigins.includes(origin);
+        if (!isAllowed) {
+            return callback(new Error('Not allowed by CORS'), false);
         }
         return callback(null, true);
     },
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    exposedHeaders: ['set-cookie', 'Authorization'],
 }));
 
-app.options('*', cors());
+app.options('*', cors()); // Preflight cho tất cả route
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://subtle-mousse-6f050b.netlify.app');
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'https://subtle-mousse-6f050b.netlify.app');
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+//   next();
+// });
 
 // Root Endpoint
 app.get("/", (req, res) => {

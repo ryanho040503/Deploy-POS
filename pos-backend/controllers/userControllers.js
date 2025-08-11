@@ -11,7 +11,7 @@ const registerUser = async (req, res, next) => {
     try {
         const { name, phone, email, password, role } = req.body;
 
-        if(!name || !phone || !email || !password || !role) {
+        if (!name || !phone || !email || !password || !role) {
             const error = createHttpError(400, "All fields are required");
             return next(error);
         }
@@ -61,28 +61,28 @@ const registerUser = async (req, res, next) => {
 const login = async (req, res, next) => {
 
     try {
-        
+
         const { email, password } = req.body;
         console.log("📥 req.body:", req.body);  // Đây để kiểm tra dữ liệu request gửi lên
 
-        if(!email || !password) {
+        if (!email || !password) {
             const error = createHttpError(400, "Email and password are required");
             return next(error);
         }
 
-        const userLogin = await User.findOne({email});
-        if(!userLogin){
+        const userLogin = await User.findOne({ email });
+        if (!userLogin) {
             const error = createHttpError(404, "User not found");
             return next(error);
-        } 
+        }
 
         const isMatch = await bcrypt.compare(password, userLogin.password);
-        if(!isMatch) {
+        if (!isMatch) {
             const error = createHttpError(401, "Invalid credentials");
             return next(error);
         }
 
-        const accessToken = jwt.sign({_id: userLogin._id}, config.accessTokenSecret, {
+        const accessToken = jwt.sign({ _id: userLogin._id }, config.accessTokenSecret, {
             expiresIn: '1d'
         });
 
@@ -93,7 +93,8 @@ const login = async (req, res, next) => {
             secure: true
         })
 
-        res.status(200).json({success: true, message: "Login successful", 
+        res.status(200).json({
+            success: true, message: "Login successful",
             data: userLogin
         });
 
@@ -123,8 +124,12 @@ const getUserData = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        res.clearCookie('accessToken');
-        res.status(200).json({success: true, message: "User logout succesfully!"});
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true
+        });;
+        res.status(200).json({ success: true, message: "User logout succesfully!" });
     } catch (error) {
         next(error);
     }
