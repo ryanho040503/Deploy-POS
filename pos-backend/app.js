@@ -16,6 +16,7 @@ connectDB();
 
 const allowedOrigins = [
     'https://subtle-mousse-6f050b.netlify.app',
+    'https://deploy-pos-qo3n.onrender.com', // ✅ Thêm domain backend
     'http://localhost:5173', // Cho môi trường dev
     'https://localhost:5173'
 ];
@@ -23,32 +24,6 @@ const allowedOrigins = [
 // Middleware
 app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
-// app.use(cors({
-//     credentials: true,
-//     // origin: ['https://localhost:5173']
-//     // origin: allowedOrigins,
-//     origin: function (origin, callback) {
-//         // Cho phép requests không có origin (như mobile apps hoặc curl requests)
-//         if (!origin) return callback(null, true);
-
-//         // Kiểm tra nếu origin kết thúc bằng domain được phép (cho subdomains)
-//         const isAllowed = allowedOrigins.some(allowed => 
-//             origin === allowed || 
-//             origin.startsWith(allowed.replace('https://', 'http://')) ||
-//             origin.startsWith(allowed.replace('http://', 'https://'))
-//         );
-
-
-//         if (allowedOrigins.indexOf(origin) === -1) {
-//             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-//             return callback(new Error(msg), false);
-//         }
-//         return callback(null, true);
-//     },
-//     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     credentials: true
-// }));
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -64,10 +39,6 @@ app.use(cors({
     credentials: true,
     exposedHeaders: ['set-cookie', 'Authorization'],
 }));
-
-app.use(cookieParser());
-
-app.options('*', cors()); // Preflight cho tất cả route
 
 // app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', 'https://subtle-mousse-6f050b.netlify.app');

@@ -28,7 +28,7 @@ const isVerifiedUser = async (req, res, next) => {
 
     } catch (error) {
         const err = createHttpError(401, "Invalid token!");
-        next(error);
+        next(err);
     }
 }
 

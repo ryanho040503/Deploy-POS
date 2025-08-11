@@ -95,8 +95,10 @@ const login = async (req, res, next) => {
         })
 
         res.status(200).json({
-            success: true, message: "Login successful",
-            data: userLogin
+            success: true, 
+            message: "Login successful",
+            data: userLogin,
+            token: accessToken // ✅ Thêm token vào response
         });
 
     } catch (error) {
