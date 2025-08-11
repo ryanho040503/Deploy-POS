@@ -124,17 +124,25 @@ const login = async (req, res, next) => {
 const getUserData = async (req, res, next) => {
 
     try {
-
+        console.log('📥 getUserData called for user:', req.user._id);
+        
         const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            console.log('❌ User not found in database');
+            return next(createHttpError(404, "User not found"));
+        }
+        
+        console.log('✅ User data retrieved successfully:', user.name);
+        
         res.status(200).json({
             success: true,
             data: user
         })
 
     } catch (error) {
-
+        console.log('❌ Error in getUserData:', error.message);
         next(error);
-
     }
 
 }
