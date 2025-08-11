@@ -14,7 +14,7 @@ const PORT = process.env.PORT;
 connectDB();
 
 const allowedOrigins = [
-    // 'https://classy-moxie-5c2a08.netlify.app',
+    'https://subtle-mousse-6f050b.netlify.app/auth',
     'http://localhost:5173', // Cho môi trường dev
     'https://localhost:5173'
 ];
@@ -25,10 +25,30 @@ app.use(cookieParser()); // Parse cookies
 app.use(cors({
     credentials: true,
     // origin: ['https://localhost:5173']
-    origin: allowedOrigins,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    // origin: allowedOrigins,
+    origin: function (origin, callback) {
+        // Cho phép requests không có origin (như mobile apps hoặc curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
+
+app.options('*', cors());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://subtle-mousse-6f050b.netlify.app');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
+});
 
 // Root Endpoint
 app.get("/", (req, res) => {
