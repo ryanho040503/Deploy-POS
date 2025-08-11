@@ -30,11 +30,19 @@ const Login = () => {
         mutationFn: (reqData) => login(reqData),
         onSuccess: (res ) => {
             const { data } = res;
+
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+            }
+
             console.log(data);
+
+
             const { _id, name, email, phone, role} = data.data;
-            dispatch(setUser({ _id, name, email, phone, role}));
+            dispatch(setUser({ _id, name, email, phone, role, token: data.token}));
             navigate('/');
         },
+
         onError: (error) => {
             console.error('Login failed:', error);
             const { response } = error;
@@ -59,6 +67,7 @@ const Login = () => {
                             placeholder="Enter employee email"
                             className="bg-transparent flex-1 text-white focus:outline-none"
                             required
+                            autoComplete="username"
                         />
                     </div>
                 </div>
@@ -76,6 +85,7 @@ const Login = () => {
                             placeholder="Enter password"
                             className="bg-transparent flex-1 text-white focus:outline-none"
                             required
+                            autoComplete="current-password"
                         />
                     </div>
                 </div>
