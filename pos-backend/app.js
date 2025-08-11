@@ -52,13 +52,12 @@ app.use(cookieParser()); // Parse cookies
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin) return callback(null, true); // Cho phép request không có origin (Postman, curl)
-
-        const isAllowed = allowedOrigins.includes(origin);
-        if (!isAllowed) {
-            return callback(new Error('Not allowed by CORS'), false);
+        if (!origin) return callback(null, true); // cho phép Postman hoặc curl không origin
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
         }
-        return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
