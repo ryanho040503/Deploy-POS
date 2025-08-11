@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
     origin: function (origin, callback) {
-        // ✅ Cho phép tất cả requests không có origin (mobile apps, Safari private mode)
+        // ✅ Cho phép tất cả requests không có origin
         if (!origin) return callback(null, true);
         
         // ✅ Kiểm tra domain chính xác
@@ -49,7 +49,7 @@ app.use(cors({
             return callback(null, true);
         }
         
-        // ✅ Kiểm tra subdomain của Netlify
+        // ✅ Cho phép tất cả Netlify domains
         if (origin.includes('netlify.app') || origin.includes('netlify.com')) {
             return callback(null, true);
         }
@@ -65,9 +65,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
-    exposedHeaders: ['set-cookie', 'Authorization'],
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    exposedHeaders: ['set-cookie', 'Authorization']
 }));
 
 // app.use((req, res, next) => {
