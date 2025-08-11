@@ -16,28 +16,58 @@ connectDB();
 
 const allowedOrigins = [
     'https://subtle-mousse-6f050b.netlify.app',
-    'https://deploy-pos-qo3n.onrender.com', // ✅ Thêm domain backend
-    'http://localhost:5173', // Cho môi trường dev
-    'https://localhost:5173'
+    'https://deploy-pos-qo3n.onrender.com',
+    'http://localhost:5173',
+    'https://localhost:5173',
+    // ✅ Thêm các domain có thể có của Netlify
+    'https://*.netlify.app',
+    'https://*.netlify.com'
 ];
 
 // Middleware
 app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
 
+// ✅ Thêm middleware để log request và detect mobile
+app.use((req, res, next) => {
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const origin = req.headers.origin || 'No origin';
+    
+    console.log(`📱 Request from: ${origin} | Mobile: ${isMobile} | Method: ${req.method} | Path: ${req.path}`);
+    
+    next();
+});
+
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin) return callback(null, true); // cho phép Postman hoặc curl không origin
+        // ✅ Cho phép tất cả requests không có origin (mobile apps, Safari private mode)
+        if (!origin) return callback(null, true);
+        
+        // ✅ Kiểm tra domain chính xác
         if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+            return callback(null, true);
         }
+        
+        // ✅ Kiểm tra subdomain của Netlify
+        if (origin.includes('netlify.app') || origin.includes('netlify.com')) {
+            return callback(null, true);
+        }
+        
+        // ✅ Cho phép localhost cho development
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            return callback(null, true);
+        }
+        
+        console.log('❌ CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
     exposedHeaders: ['set-cookie', 'Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 
 // app.use((req, res, next) => {

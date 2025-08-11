@@ -86,19 +86,33 @@ const login = async (req, res, next) => {
             expiresIn: '1d'
         });
 
-        res.cookie('accessToken', accessToken, {
-            maxAge: 1000 * 60 * 60 * 24 * 30, // 30 day
+        // ✅ Cập nhật cookie settings cho mobile compatibility
+        const cookieOptions = {
+            maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
             httpOnly: true,
             sameSite: 'none',
             secure: true,
             path: '/',
-        })
+            domain: undefined // ✅ Để browser tự động set domain
+        };
+
+        // ✅ Kiểm tra User-Agent để điều chỉnh cookie settings
+        const userAgent = req.headers['user-agent'] || '';
+        const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        
+        if (isMobile) {
+            // ✅ Điều chỉnh cho mobile devices
+            cookieOptions.sameSite = 'lax'; // ✅ Thay đổi từ 'none' sang 'lax' cho mobile
+            console.log('📱 Mobile device detected, using lax sameSite');
+        }
+
+        res.cookie('accessToken', accessToken, cookieOptions);
 
         res.status(200).json({
             success: true, 
             message: "Login successful",
             data: userLogin,
-            token: accessToken // ✅ Thêm token vào response
+            token: accessToken
         });
 
     } catch (error) {
@@ -127,11 +141,24 @@ const getUserData = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        res.clearCookie('accessToken', {
+        // ✅ Cập nhật cookie options cho logout
+        const cookieOptions = {
             httpOnly: true,
             sameSite: 'none',
-            secure: true
-        });;
+            secure: true,
+            path: '/',
+            domain: undefined
+        };
+
+        // ✅ Kiểm tra User-Agent để điều chỉnh cookie settings
+        const userAgent = req.headers['user-agent'] || '';
+        const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        
+        if (isMobile) {
+            cookieOptions.sameSite = 'lax';
+        }
+
+        res.clearCookie('accessToken', cookieOptions);
         res.status(200).json({ success: true, message: "User logout succesfully!" });
     } catch (error) {
         next(error);
