@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 
 
 
+
 const PORT = process.env.PORT;
 connectDB();
 
@@ -64,6 +65,8 @@ app.use(cors({
     credentials: true,
     exposedHeaders: ['set-cookie', 'Authorization'],
 }));
+
+app.use(cookieParser());
 
 app.options('*', cors()); // Preflight cho tất cả route
 

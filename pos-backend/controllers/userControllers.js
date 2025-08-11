@@ -90,7 +90,7 @@ const login = async (req, res, next) => {
             maxAge: 1000 * 60 * 60 * 24 * 30, // 30 day
             httpOnly: true,
             sameSite: 'none',
-            secure: true
+            secure: true,
         })
 
         res.status(200).json({
