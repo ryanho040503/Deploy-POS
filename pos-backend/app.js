@@ -30,6 +30,14 @@ app.use(cors({
         // Cho phép requests không có origin (như mobile apps hoặc curl requests)
         if (!origin) return callback(null, true);
 
+        // Kiểm tra nếu origin kết thúc bằng domain được phép (cho subdomains)
+        const isAllowed = allowedOrigins.some(allowed => 
+            origin === allowed || 
+            origin.startsWith(allowed.replace('https://', 'http://')) ||
+            origin.startsWith(allowed.replace('http://', 'https://'))
+        );
+
+
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
