@@ -99,11 +99,14 @@ const login = async (req, res, next) => {
         // ✅ Kiểm tra User-Agent để điều chỉnh cookie settings
         const userAgent = req.headers['user-agent'] || '';
         const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
         
-        if (isMobile) {
-            // ✅ Điều chỉnh cho mobile devices
+        console.log('📱 Device info:', { isMobile, isSafari, userAgent: userAgent.substring(0, 50) });
+        
+        if (isMobile || isSafari) {
+            // ✅ Điều chỉnh cho mobile devices và Safari
             cookieOptions.sameSite = 'lax'; // ✅ Thay đổi từ 'none' sang 'lax' cho mobile
-            console.log('📱 Mobile device detected, using lax sameSite');
+            console.log('📱 Mobile/Safari device detected, using lax sameSite');
         }
 
         res.cookie('accessToken', accessToken, cookieOptions);
