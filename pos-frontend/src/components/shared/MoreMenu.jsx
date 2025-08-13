@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { IoEllipsisVertical, IoNotifications, IoSettings, IoMoon, IoSunny, IoLanguage, IoHelpCircle, IoInformationCircle } from 'react-icons/io5';
+import { IoEllipsisVertical, IoNotifications, IoSettings, IoMoon, IoSunny, IoLanguage, IoHelpCircle, IoInformationCircle, IoBug, IoCode } from 'react-icons/io5';
 import { useSelector, useDispatch } from 'react-redux';
+import SimpleTest from '../debug/SimpleTest';
+import AuthDebug from '../debug/AuthDebug';
+import IncognitoTest from '../debug/IncognitoTest';
+import MobileConsole from '../debug/MobileConsole';
 
 const MoreMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
     const [language, setLanguage] = useState('en');
+    const [showDebugTools, setShowDebugTools] = useState(false);
+    const [showMobileConsole, setShowMobileConsole] = useState(false);
     const menuRef = useRef(null);
     const userData = useSelector(state => state.user);
 
@@ -44,6 +50,14 @@ const MoreMenu = () => {
         console.log('🌐 Language changed to:', lang);
     };
 
+    const toggleDebugTools = () => {
+        setShowDebugTools(!showDebugTools);
+    };
+
+    const toggleMobileConsole = () => {
+        setShowMobileConsole(!showMobileConsole);
+    };
+
     const menuItems = [
         {
             id: 'notifications',
@@ -74,6 +88,22 @@ const MoreMenu = () => {
             ]
         },
         {
+            id: 'debugTools',
+            icon: <IoBug className="text-lg" />,
+            label: 'Debug Tools',
+            action: toggleDebugTools,
+            toggle: showDebugTools,
+            description: 'Show/hide debug components'
+        },
+        {
+            id: 'mobileConsole',
+            icon: <IoCode className="text-lg" />,
+            label: 'Mobile Console',
+            action: toggleMobileConsole,
+            toggle: showMobileConsole,
+            description: 'Show/hide mobile console'
+        },
+        {
             id: 'settings',
             icon: <IoSettings className="text-lg" />,
             label: 'Settings',
@@ -97,107 +127,121 @@ const MoreMenu = () => {
     ];
 
     return (
-        <div className="relative" ref={menuRef}>
-            {/* More Button */}
-            <button
-                onClick={toggleMenu}
-                className="bg-[#1f1f1f] rounded-[15px] p-3 cursor-pointer hover:bg-[#2a2a2a] transition-colors duration-200"
-                title="More Options"
-            >
-                <IoEllipsisVertical className="text-[#f5f5f5] text-2xl" />
-            </button>
+        <>
+            <div className="relative" ref={menuRef}>
+                {/* More Button */}
+                <button
+                    onClick={toggleMenu}
+                    className="bg-[#1f1f1f] rounded-[15px] p-3 cursor-pointer hover:bg-[#2a2a2a] transition-colors duration-200"
+                    title="More Options"
+                >
+                    <IoEllipsisVertical className="text-[#f5f5f5] text-2xl" />
+                </button>
 
-            {/* Dropdown Menu */}
-            {isOpen && (
-                <div className="absolute right-0 top-14 w-80 bg-[#1a1a1a] rounded-lg shadow-2xl border border-[#333] z-50">
-                    {/* Header */}
-                    <div className="p-4 border-b border-[#333]">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-[#333] rounded-full flex items-center justify-center">
-                                <IoEllipsisVertical className="text-[#f5f5f5] text-xl" />
+                {/* Dropdown Menu */}
+                {isOpen && (
+                    <div className="absolute right-0 top-14 w-80 bg-[#1a1a1a] rounded-lg shadow-2xl border border-[#333] z-50">
+                        {/* Header */}
+                        <div className="p-4 border-b border-[#333]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-[#333] rounded-full flex items-center justify-center">
+                                    <IoEllipsisVertical className="text-[#f5f5f5] text-xl" />
+                                </div>
+                                <div>
+                                    <h3 className="text-[#f5f5f5] font-semibold">More Options</h3>
+                                    <p className="text-[#ababab] text-sm">Manage your preferences</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-[#f5f5f5] font-semibold">More Options</h3>
-                                <p className="text-[#ababab] text-sm">Manage your preferences</p>
+                        </div>
+
+                        {/* Menu Items */}
+                        <div className="max-h-96 overflow-y-auto">
+                            {menuItems.map((item) => (
+                                <div key={item.id} className="border-b border-[#333] last:border-b-0">
+                                    {item.id === 'language' ? (
+                                        // Language submenu
+                                        <div className="p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    {item.icon}
+                                                    <div>
+                                                        <span className="text-[#f5f5f5] font-medium">{item.label}</span>
+                                                        <p className="text-[#ababab] text-xs">{item.description}</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-[#f5f5f5] text-sm">
+                                                    {item.submenu.find(lang => lang.code === language)?.flag} {item.submenu.find(lang => lang.code === language)?.name}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {item.submenu.map((lang) => (
+                                                    <button
+                                                        key={lang.code}
+                                                        onClick={() => changeLanguage(lang.code)}
+                                                        className={`px-3 py-2 rounded-lg text-sm transition-colors duration-200 ${
+                                                            language === lang.code
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'bg-[#333] text-[#f5f5f5] hover:bg-[#444]'
+                                                        }`}
+                                                    >
+                                                        {lang.flag} {lang.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        // Regular menu item
+                                        <button
+                                            onClick={item.action}
+                                            className="w-full p-4 text-left hover:bg-[#2a2a2a] transition-colors duration-200"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    {item.icon}
+                                                    <div>
+                                                        <span className="text-[#f5f5f5] font-medium">{item.label}</span>
+                                                        <p className="text-[#ababab] text-xs">{item.description}</p>
+                                                    </div>
+                                                </div>
+                                                {item.toggle !== undefined && (
+                                                    <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
+                                                        item.toggle ? 'bg-blue-600' : 'bg-[#333]'
+                                                    }`}>
+                                                        <div className={`w-5 h-5 bg-white rounded-full transition-transform duration-200 transform ${
+                                                            item.toggle ? 'translate-x-6' : 'translate-x-1'
+                                                        }`} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t border-[#333] bg-[#1f1f1f] rounded-b-lg">
+                            <div className="text-center text-[#ababab] text-sm">
+                                <p>Cloud Kitchen v1.0.0</p>
+                                <p className="text-xs mt-1">User: {userData.name || 'Unknown'}</p>
                             </div>
                         </div>
                     </div>
+                )}
+            </div>
 
-                    {/* Menu Items */}
-                    <div className="max-h-96 overflow-y-auto">
-                        {menuItems.map((item) => (
-                            <div key={item.id} className="border-b border-[#333] last:border-b-0">
-                                {item.id === 'language' ? (
-                                    // Language submenu
-                                    <div className="p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-3">
-                                                {item.icon}
-                                                <div>
-                                                    <span className="text-[#f5f5f5] font-medium">{item.label}</span>
-                                                    <p className="text-[#ababab] text-xs">{item.description}</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[#f5f5f5] text-sm">
-                                                {item.submenu.find(lang => lang.code === language)?.flag} {item.submenu.find(lang => lang.code === language)?.name}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            {item.submenu.map((lang) => (
-                                                <button
-                                                    key={lang.code}
-                                                    onClick={() => changeLanguage(lang.code)}
-                                                    className={`px-3 py-2 rounded-lg text-sm transition-colors duration-200 ${
-                                                        language === lang.code
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'bg-[#333] text-[#f5f5f5] hover:bg-[#444]'
-                                                    }`}
-                                                >
-                                                    {lang.flag} {lang.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    // Regular menu item
-                                    <button
-                                        onClick={item.action}
-                                        className="w-full p-4 text-left hover:bg-[#2a2a2a] transition-colors duration-200"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                {item.icon}
-                                                <div>
-                                                    <span className="text-[#f5f5f5] font-medium">{item.label}</span>
-                                                    <p className="text-[#ababab] text-xs">{item.description}</p>
-                                                </div>
-                                            </div>
-                                            {item.toggle !== undefined && (
-                                                <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                                                    item.toggle ? 'bg-blue-600' : 'bg-[#333]'
-                                                }`}>
-                                                    <div className={`w-5 h-5 bg-white rounded-full transition-transform duration-200 transform ${
-                                                        item.toggle ? 'translate-x-6' : 'translate-x-1'
-                                                    }`} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="p-4 border-t border-[#333] bg-[#1f1f1f] rounded-b-lg">
-                        <div className="text-center text-[#ababab] text-sm">
-                            <p>Cloud Kitchen v1.0.0</p>
-                            <p className="text-xs mt-1">User: {userData.name || 'Unknown'}</p>
-                        </div>
-                    </div>
-                </div>
+            {/* Debug Components - Conditionally Rendered */}
+            {showDebugTools && (
+                <>
+                    <SimpleTest />
+                    <AuthDebug />
+                    <IncognitoTest />
+                </>
             )}
-        </div>
+
+            {/* Mobile Console - Conditionally Rendered */}
+            {showMobileConsole && <MobileConsole />}
+        </>
     );
 };
 

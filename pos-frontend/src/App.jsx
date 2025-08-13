@@ -9,11 +9,6 @@ import useLoadData from './hooks/useLoadData';
 import FullScreenLoader from './components/shared/FullScreenLoader';
 import Dashboard from './pages/Dashboard';
 import ErrorLogs from './components/debug/ErrorLogs';
-import SimpleTest from './components/debug/SimpleTest';
-import AuthDebug from './components/debug/AuthDebug';
-import IncognitoTest from './components/debug/IncognitoTest';
-import MobileConsole from './components/debug/MobileConsole';
-import IPadTest from './components/debug/IPadTest';
 
 function Layout() {
 
@@ -59,11 +54,6 @@ function Layout() {
       
       {/* ✅ Debug component - chỉ hiển thị trong development */}
       {process.env.NODE_ENV === 'development' && <ErrorLogs />}
-      <SimpleTest />
-      <AuthDebug />
-      <IncognitoTest />
-      <MobileConsole />
-      <IPadTest />
     </>
   )
 }
