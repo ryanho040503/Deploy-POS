@@ -8,6 +8,12 @@ import { Navigate } from 'react-router-dom';
 import useLoadData from './hooks/useLoadData';
 import FullScreenLoader from './components/shared/FullScreenLoader';
 import Dashboard from './pages/Dashboard';
+import ErrorLogs from './components/debug/ErrorLogs';
+import SimpleTest from './components/debug/SimpleTest';
+import AuthDebug from './components/debug/AuthDebug';
+import IncognitoTest from './components/debug/IncognitoTest';
+import MobileConsole from './components/debug/MobileConsole';
+import IPadTest from './components/debug/IPadTest';
 
 function Layout() {
 
@@ -50,15 +56,34 @@ function Layout() {
         } />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
-
+      
+      {/* ✅ Debug component - chỉ hiển thị trong development */}
+      {process.env.NODE_ENV === 'development' && <ErrorLogs />}
+      <SimpleTest />
+      <AuthDebug />
+      <IncognitoTest />
+      <MobileConsole />
+      <IPadTest />
     </>
   )
 }
 
 function ProtectedRoutes({children}){
-
   const { isAuth } = useSelector(state => state.user);
-  if(!isAuth){
+  
+  // ✅ Kiểm tra token an toàn cho incognito mode
+  let token = null;
+  try {
+    token = localStorage.getItem('token');
+  } catch (e) {
+    console.log('❌ Cannot access localStorage (incognito mode?)');
+  }
+  
+  console.log('🔒 ProtectedRoutes check:', { isAuth, hasToken: !!token });
+  
+  // ✅ Chỉ kiểm tra Redux state nếu không có localStorage
+  if (!isAuth) {
+    console.log('❌ Access denied, redirecting to auth');
     return <Navigate to='/auth' />
   }
 

@@ -6,6 +6,15 @@ import { Provider } from 'react-redux';
 import store from './redux/store.js';
 import { SnackbarProvider } from 'notistack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { setupGlobalErrorHandler, checkAppHealth } from './utils/debugUtils';
+
+// ✅ Setup global error handler an toàn
+try {
+    setupGlobalErrorHandler();
+    checkAppHealth();
+} catch (error) {
+    console.error('Failed to setup debug tools:', error);
+}
 
 const queryClient = new QueryClient ({
   defaultOptions: {

@@ -1,74 +1,62 @@
-import React, { useState, useEffect}  from 'react';
+import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../../https/index';
 import { enqueueSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { logDeviceInfo, checkCookieSupport, checkLocalStorageSupport } from '../../utils/mobileUtils';
-import { logError } from '../../utils/debugUtils';
 
-const Login = () => {
-
+const LoginSimple = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-    })
-
-    // ✅ Log device info khi component mount
-    useEffect(() => {
-        try {
-            const deviceInfo = logDeviceInfo();
-            console.log('🍪 Cookie support:', checkCookieSupport());
-            console.log('💾 localStorage support:', checkLocalStorageSupport());
-            
-            // ✅ Log device info thay vì show snackbar
-            if (deviceInfo.isMobile) {
-                console.log('📱 Mobile device detected:', deviceInfo.platform);
-            }
-        } catch (error) {
-            logError(error, 'Login useEffect');
-        }
-    }, []); // ✅ Bỏ dependency enqueueSnackbar
+    });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle registration logic here
         loginMutation.mutate(formData);
-    }
+    };
 
     const loginMutation = useMutation({
         mutationFn: (reqData) => login(reqData),
-        onSuccess: (res ) => {
+        onSuccess: (res) => {
             const { data } = res;
-
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                console.log('✅ Token saved to localStorage');
-            }
-
             console.log('✅ Login successful:', data);
 
-            const { _id, name, email, phone, role} = data.data;
-            dispatch(setUser({ _id, name, email, phone, role, token: data.token}));
-            
-            // ✅ Thêm delay nhỏ cho mobile devices
-            setTimeout(() => {
-                navigate('/');
-            }, 100);
-        },
+            if (data.token) {
+                try {
+                    localStorage.setItem('token', data.token);
+                    console.log('✅ Token saved to localStorage');
+                } catch (e) {
+                    console.log('❌ Cannot save token to localStorage (incognito mode?)');
+                    // Vẫn tiếp tục với session-based auth
+                }
+            }
 
+            if (data.data) {
+                const { _id, name, email, phone, role } = data.data;
+                dispatch(setUser({ _id, name, email, phone, role, token: data.token }));
+                console.log('✅ User state updated');
+                
+                // ✅ Thêm delay cho mobile devices và incognito mode
+                setTimeout(() => {
+                    console.log('🚀 Navigating to home page');
+                    navigate('/');
+                }, 1000); // Tăng delay lên 1 giây
+            } else {
+                throw new Error('Invalid user data in response');
+            }
+        },
         onError: (error) => {
             console.error('❌ Login failed:', error);
-            logError(error, 'Login Mutation');
             
-            // ✅ Better error handling cho mobile
+            // ✅ Better error handling
             let errorMessage = 'Login failed. Please try again.';
             
             if (error.response) {
@@ -83,12 +71,11 @@ const Login = () => {
             
             enqueueSnackbar(errorMessage, { variant: "error" });
         }
-    })
+    });
 
     return (
         <div>
             <form onSubmit={handleSubmit}>
-
                 <div>
                     <label className='block text-[#ababab] mb-2 mt-3 text-sm font-medium'>
                         Employee Email
@@ -102,7 +89,6 @@ const Login = () => {
                             placeholder="Enter employee email"
                             className="bg-transparent flex-1 text-white focus:outline-none"
                             required
-                            autoComplete="username"
                         />
                     </div>
                 </div>
@@ -120,7 +106,6 @@ const Login = () => {
                             placeholder="Enter password"
                             className="bg-transparent flex-1 text-white focus:outline-none"
                             required
-                            autoComplete="current-password"
                         />
                     </div>
                 </div>
@@ -130,7 +115,7 @@ const Login = () => {
                 </button>
             </form>
         </div>
-    )
-}
+    );
+};
 
-export default Login
+export default LoginSimple; 

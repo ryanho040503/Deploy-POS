@@ -21,7 +21,7 @@ export const getDeviceInfo = () => {
         isSafari: isSafari(),
         isIOS: isIOS(),
         userAgent: navigator.userAgent,
-        platform: navigator.platform
+        platform: navigator.userAgentData?.platform || 'unknown' // ✅ Sử dụng userAgentData thay vì platform
     };
 };
 

@@ -19,14 +19,12 @@ const Tables = () => {
     })
 
     if (isError) {
-        enqueueSnackbar("Something went wrong!", { variant: error });
+        enqueueSnackbar("Something went wrong!", { variant: "error" });
     }
 
     const sortedTables = [...(resData?.data?.data || [])].sort(
         (a, b) => a.tableNo - b.tableNo
     );
-
-    console.log(resData);
 
     return (
         <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-hidden">

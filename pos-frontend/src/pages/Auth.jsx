@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import restaurant from '../assets/restaurant-img.jpg';
 import logo from '../assets/logo.png';
 import Register from '../components/auth/Register';
-import Login from '../components/auth/Login';
+import LoginSimple from '../components/auth/LoginSimple'; // ✅ Tạm thời dùng LoginSimple
 
 const Auth = () => {
 
@@ -41,7 +41,7 @@ const Auth = () => {
                 </h2>
 
             {/* Components */}
-            {isRegister ? <Register setIsRegister={setIsRegister} /> : <Login />}
+            {isRegister ? <Register setIsRegister={setIsRegister} /> : <LoginSimple />}
 
             <div className='flex justify-center mt-6'>
                 <p className='text-sm text-[#ababab]'>

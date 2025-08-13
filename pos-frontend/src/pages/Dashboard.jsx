@@ -59,14 +59,11 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {console.log("Modal open?", isTableModalOpen)}
-
             {activeTab === "Metrics" && <Metric />}
             {activeTab === "Orders" && <RecentOrders />}
             {/* {isTableModalOpen && <Modal setIsTableModalOpen={setIsTableModalOpen} />} */}
 
-            {isTableModalOpen && (console.log("Rendering Modal"), <Modal setIsTableModalOpen={setIsTableModalOpen} />)}
-
+            {isTableModalOpen && <Modal setIsTableModalOpen={setIsTableModalOpen} />}
 
            <BottomNav />
         </div>

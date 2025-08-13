@@ -14,10 +14,24 @@ const api = axios.create({
     }
 })
 
-// ✅ Thêm request interceptor để log requests
+// ✅ Thêm request interceptor để log requests và tự động gửi token
 api.interceptors.request.use(
     (config) => {
         console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+        
+        // ✅ Tự động thêm token vào header nếu có
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+                console.log('🔑 Token added to request:', token.substring(0, 20) + '...');
+            } else {
+                console.log('⚠️ No token found in localStorage');
+            }
+        } catch (e) {
+            console.log('❌ Cannot access localStorage:', e.message);
+        }
+        
         return config;
     },
     (error) => {
