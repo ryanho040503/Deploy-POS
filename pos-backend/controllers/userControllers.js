@@ -152,26 +152,46 @@ const getUserData = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
+        console.log('🚪 Logout requested for user:', req.user?._id || 'unknown');
+        
         // ✅ Cập nhật cookie options cho logout
         const cookieOptions = {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
             path: '/',
-            domain: undefined
+            domain: undefined // ✅ Để browser tự động set domain
         };
 
         // ✅ Kiểm tra User-Agent để điều chỉnh cookie settings
         const userAgent = req.headers['user-agent'] || '';
         const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
         
-        if (isMobile) {
+        console.log('📱 Logout device info:', { isMobile, isSafari, userAgent: userAgent.substring(0, 50) });
+        
+        if (isMobile || isSafari) {
             cookieOptions.sameSite = 'lax';
+            console.log('📱 Mobile/Safari device detected, using lax sameSite for logout');
         }
 
+        // ✅ Clear cookie với options chính xác
         res.clearCookie('accessToken', cookieOptions);
-        res.status(200).json({ success: true, message: "User logout succesfully!" });
+        
+        // ✅ Thử clear với các domain khác nhau để đảm bảo
+        res.clearCookie('accessToken', { ...cookieOptions, domain: '.onrender.com' });
+        res.clearCookie('accessToken', { ...cookieOptions, domain: '.netlify.app' });
+        
+        console.log('🍪 Cookies cleared successfully');
+        
+        res.status(200).json({ 
+            success: true, 
+            message: "User logout successfully!",
+            timestamp: new Date().toISOString()
+        });
+        
     } catch (error) {
+        console.log('❌ Error in logout:', error.message);
         next(error);
     }
 }
